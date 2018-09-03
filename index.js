@@ -1,56 +1,45 @@
-'use strict';
+const { app, BrowserWindow } = require('electron')
+const { Client } = require('discord-rpc')
 
-/* eslint-disable no-console */
+const windowParameters = {
+    backgroundColor: '#000',
+    useContentSize: false,
+    autoHideMenuBar: true,
+    resizable: true,
+    center: true,
+    frame: true,
+    alwaysOnTop: false,
+    title: 'Curve Fever Pro',
+    webPreferences: {
+      nodeIntegration: false,
+      plugins: true,
+    }
+  },
+  clientId = '485881415993524224',
+  startTimestamp = new Date(),
+  rpc = new Client({ transport: 'ipc' })
 
-const { app, BrowserWindow } = require('electron');
-const path = require('path');
-const url = require('url');
-const DiscordRPC = require('discord-rpc');
+let mainWindow, link, roomName
 
-let mainWindow;
-
-function createWindow() {
-  mainWindow = new BrowserWindow({
-    width: 340,
-    height: 380
-  });
-
+app.on('ready', () => {
+  mainWindow = new BrowserWindow(windowParameters)
   mainWindow.maximize()
-  mainWindow.loadURL('http://curvefever.pro');
-
+  mainWindow.loadURL('http://curvefever.pro')
   mainWindow.on('closed', () => {
-    mainWindow = null;
-  });
-}
-
-app.on('ready', createWindow);
+    mainWindow = null
+  })
+})
 
 app.on('window-all-closed', () => {
-  app.quit();
-});
-
-app.on('activate', () => {
-  if (mainWindow === null) {
-    createWindow();
-  }
-});
-
-// don't change the client id if you want this example to work
-const clientId = '485881415993524224';
-
-// only needed for discord allowing spectate, join, ask to join
-DiscordRPC.register(clientId);
-
-const rpc = new DiscordRPC.Client({ transport: 'ipc' });
-const startTimestamp = new Date();
-let link, roomName
+  app.quit()
+})
 
 async function setActivity() {
   if (!rpc || !mainWindow) {
     return;
   }
 
-  const boops = await mainWindow.webContents.executeJavaScript(`
+  const infos = await mainWindow.webContents.executeJavaScript(`
   (function() {
     if (document.getElementsByClassName('room-invite-friends').length > 0) {
       return {'type': 'Custom room', 'current': 'In queue'}
@@ -64,7 +53,7 @@ async function setActivity() {
     }
   })()`);
 
-  if (boops === null) {
+  if (infos === null) {
     rpc.setActivity({
       details: 'Browsing',
       state: 'In the main menu',
@@ -76,13 +65,16 @@ async function setActivity() {
     return
   }
 
-  if (boops['type'] === 'Custom room' && boops['current'] === 'In queue') {
+  if (infos['type'] === 'Custom room' && infos['current'] === 'In queue') {
     link = await mainWindow.webContents.executeJavaScript(`(function(){return document.getElementById('roomLink').value})()`)
-    roomName = await mainWindow.webContents.executeJavaScript(`document.getElementsByClassName('room-invite-friends__header')[0].getElementsByTagName('div')[0].getElementsByTagName('span')[1].innerHTML`)
+    roomName = await mainWindow.webContents.executeJavaScript(`document
+    .getElementsByClassName('room-invite-friends__header')[0]
+    .getElementsByTagName('div')[0]
+    .getElementsByTagName('span')[1].innerHTML`)
 
     rpc.setActivity({
-      details: boops['type'] + ', ' + boops['current'],
-      state: roomName,
+      details: infos['type'] + ', ' + infos['current'],
+      state: 'Room: ' + roomName,
       startTimestamp,
       largeImageKey: 'curve-fever-pro',
       largeImageText: link
@@ -92,8 +84,8 @@ async function setActivity() {
   }
 
   rpc.setActivity({
-    details: boops['type'],
-    state: boops['current'],
+    details: infos['type'],
+    state: infos['current'],
     startTimestamp,
     largeImageKey: 'curve-fever-pro',
     largeImageText: 'Curve Fever Pro'
@@ -101,12 +93,12 @@ async function setActivity() {
 }
 
 rpc.on('ready', () => {
-  setActivity();
+  setActivity()
 
-  // activity can only be set every 15 seconds
+  // activity can only be set every 5 seconds
   setInterval(() => {
-    setActivity();
-  }, 1000);
+    setActivity()
+  }, 5E2);
 });
 
-rpc.login({ clientId }).catch(console.error);
+rpc.login({ clientId }).catch(console.error)
