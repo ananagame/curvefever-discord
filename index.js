@@ -35,9 +35,8 @@ app.on('window-all-closed', () => {
 })
 
 async function setActivity() {
-  if (!rpc || !mainWindow) {
-    return;
-  }
+  if (!rpc || !mainWindow)
+    return
 
   const infos = await mainWindow.webContents.executeJavaScript(`
   (function() {
@@ -66,7 +65,9 @@ async function setActivity() {
   }
 
   if (infos['type'] === 'Custom room' && infos['current'] === 'In queue') {
-    link = await mainWindow.webContents.executeJavaScript(`(function(){return document.getElementById('roomLink').value})()`)
+    link = await mainWindow.webContents.executeJavaScript(`(function() {
+      return document.getElementById('roomLink').value
+    })()`)
     roomName = await mainWindow.webContents.executeJavaScript(`document
     .getElementsByClassName('room-invite-friends__header')[0]
     .getElementsByTagName('div')[0]
