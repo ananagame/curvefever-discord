@@ -4,7 +4,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "electron ."
+    "start": "electron .",
+    "postinstall": "install-app-deps",
+    "dist": "npm run build && build --publish onTagOrDraft"
   },
   "author": "Anana",
   "license": "MIT",
@@ -14,5 +16,43 @@
   "dependencies": {
     "discord-rpc": "^3.0.0",
     "electron": "^2.0.8"
+  },
+  "build": {
+    "appId": "org.breta.MemoryKing",
+    "category": "public.app-category.education",
+    "files": [
+      "dist/",
+      "node_modules/",
+      "static/",
+      "main.js",
+      "index.html",
+      "package.json"
+    ],
+    "dmg": {
+      "contents": [
+        {
+          "x": 130,
+          "y": 220
+        },
+        {
+          "x": 410,
+          "y": 220,
+          "type": "link",
+          "path": "/Applications"
+        }
+      ]
+    },
+    "win": {
+      "target": "nsis"
+    },
+    "linux": {
+      "target": [
+        "AppImage",
+        "deb"
+      ]
+    },
+    "directories": {
+      "output": "release"
+    }
   }
 }
