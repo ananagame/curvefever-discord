@@ -11,6 +11,7 @@
   "author": "Anana",
   "license": "MIT",
   "devDependencies": {
+    "electron-builder": "^20.28.4",
     "electron-prebuilt": "^1.4.13"
   },
   "dependencies": {
